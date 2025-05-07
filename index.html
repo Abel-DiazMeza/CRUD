@@ -9,75 +9,21 @@
     </head>
     <body>
         <header>
-            <section class="botones_crud">
-                <h1>CRUD</h1>
-                <button class="crear">Registrar Gasto</button>
-                <button class="leer">Visualizar</button>
-                <button class="actualizar">Actualizar información del Gasto</button>
-                <button class="eliminar">Eliminar gasto</button>
             </section>
     </header>
         <main class="contenedor">
             <section class="titulo">
                 <h2>Registro de Gastos</h2>
-            </section>
-            <section class="formulario">
-                <form action="" method="POST" id="formulario_gastos">
-                    <section class="mb-8">
-                        <label for="nombre" class="form-label">Alias del gasto: </label>
-                        <input type="text" class="form-control" id="alias" name="alias" required>
-                    </section>
-                    <section class="mb-8">
-                        <label for="monto" class="form-label">Monto: </label>
-                        <input type="number" class="form-control" id="monto" name="monto" required>
-                    </section>
-                    <section class="mb-8">
-                        <label for="fecha" class="form-label">Fecha Registro: </label>
-                        <input type="date" class="form-control" id="fecha" name="fecha" required>
-                    </section>
-                    <section class="mb-8">
-                        <label for="fecha" class="form-label">Fecha Pago: </label>
-                        <input type="date" class="form-control" id="fecha" name="fecha" required>
-                    </section>
-                    <section class="mb-8">
-                        <label>Categoría: </label>
-                            <select id="categoria" required>
-                                <option value="">--Selecciona--</option>
-                                <option value="Gasto fijo">Gasto fijo</option>
-                                <option value="Entretenimiento">Entretenimiento</option>
-                                <option value="Transporte">Transporte</option>
-                                <option value="Alimentación">Alimentación</option>
-                                <option value="Salud">Salud</option>
-                                <option value="Educación">Educación</option>
-                                <option value="Ropa">Ropa</option>
-                                <option value="Hogar">Hogar</option>
-                                <option value="Servicios">Servicios</option>
-                                <option value="Imprevistos">Imprevistos</option>
-                                <option value="Ahorro">Ahorro</option>
-                                <option value="Inversiones">Inversiones</option>
-                                <option value="Deudas">Deudas</option>
-                                <option value="Otros">Otros</option>
-                            </select><br>
-                    </section>
-                    <section class="mb-8">
-                        <label>Meses diferido (1 si no aplica):</label>
-                        <input type="number" id="meses" min="1" max="72" value="1"><br>
-                    </section>
-                    <section class="mb-8">
-                        <label>¿Es recurrente?</label>
-                        <select id="recurrente">
-                            <option value="único">Único</option>
-                            <option value="mensual">Mensual</option>
-                            <option value="quincenal">Quincenal</option>
-                        </select><br>
-                    </section>
-                    <section class="mb-8">
-                        <label for="notas" class="form-label">Notas: </label>
-                        <textarea class="form-control" id="notas" name="notas" rows="3"></textarea>
-                    </section>
-                </form>
 
-                <form id="form-gasto">
+                <!-- Generación de tarjetas de quincenas -->
+                <div id="rango-fechas">
+                    <label>Fecha inicio: <input type="date" id="fechaInicio" /></label>
+                    <label>Fecha fin: <input type="date" id="fechaFin" /></label>
+                    <button id="generarQuincenas">Generar Quincenas</button>
+                  </div>
+
+                <div id="formulario-gasto" style="display: none;">
+                  <form id="form-gasto">
                     <input type="text" id="alias" placeholder="Alias" required />
                     <input type="number" id="monto" placeholder="Monto" required />
                     <input type="date" id="fechaRegistro" required />
@@ -91,67 +37,10 @@
                     <input type="number" id="mesesDiferidos" placeholder="Meses diferidos" />
                     <textarea id="notas" placeholder="Notas"></textarea>
                     <button type="submit">Guardar</button>
-                  </form>
+                  </form> </div>
                   <div id="contenedor-quincenas" class="grid-quincenas"></div>
-
-                  <script>
-                    const form = document.getElementById("form-gasto");
-                    const contenedor = document.getElementById("contenedor-quincenas");
-                  
-                    // Crear las 24 tarjetas por quincena
-                    const meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
-                  
-                    for (let i = 0; i < 24; i++) {
-                      const mes = Math.floor(i / 2);
-                      const quincena = i % 2 === 0 ? "1ª Quincena" : "2ª Quincena";
-                  
-                      const tarjeta = document.createElement("div");
-                      tarjeta.classList.add("tarjeta-quincena");
-                      tarjeta.innerHTML = `
-                        <div class="titulo-quincena">${meses[mes]} - ${quincena}</div>
-                        <div id="q-${i}" class="contenedor-gastos"></div>
-                      `;
-                      contenedor.appendChild(tarjeta);
-                    }
-                  
-                    // Calcular el índice de la quincena (0-23)
-                    function obtenerIndiceQuincena(fechaStr) {
-                      const fecha = new Date(fechaStr);
-                      const mes = fecha.getMonth(); // 0-11
-                      const dia = fecha.getDate();  // 1-31
-                      return mes * 2 + (dia <= 15 ? 0 : 1);
-                    }
-                  
-                    // Evento del formulario
-                    form.addEventListener("submit", function (e) {
-                      e.preventDefault();
-                  
-                      const alias = document.getElementById("alias").value;
-                      const monto = document.getElementById("monto").value;
-                      const fechaRegistro = document.getElementById("fechaRegistro").value;
-                      const fechaPago = document.getElementById("fechaPago").value;
-                      const categoria = document.getElementById("categoria").value;
-                      const mesesDiferidos = document.getElementById("mesesDiferidos").value;
-                      const notas = document.getElementById("notas").value;
-                  
-                      const index = obtenerIndiceQuincena(fechaPago);
-                      const contenedorGastos = document.getElementById(`q-${index}`);
-                  
-                      const item = document.createElement("div");
-                      item.classList.add("item-gasto");
-                      item.innerHTML = `
-                        <strong>${alias}</strong> - $${monto} <br />
-                        <em>${categoria}</em> | Pago: ${fechaPago} <br />
-                        ${mesesDiferidos ? `${mesesDiferidos} meses` : ""} <br />
-                        ${notas ? `<small>Notas: ${notas}</small>` : ""}
-                      `;
-                  
-                      contenedorGastos.appendChild(item);
-                      form.reset();
-                    });
-                  </script>
-        </main>        
-        <script src="./Decs JS/main.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-7+Q1j6v4xk5g5f
+        </main>
+        <script src="./Docs_JS/main.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-7+Q1j6v4xk5g5f" ></script>
     </body>
 </html>
