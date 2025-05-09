@@ -1,0 +1,121 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #d0c3c3;
+    margin: 0;
+    padding: 0;
+    color: #403a3a;
+  }
+  
+  main.contenedor {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: auto;
+  }
+  
+  section.titulo {
+    margin-bottom: 2rem;
+  }
+  
+  h2 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  #rango-fechas,
+  #formulario-gasto {
+    background-color: #ffffff;
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+  }
+  
+  #rango-fechas label,
+  #formulario-gasto input,
+  #formulario-gasto select,
+  #formulario-gasto textarea {
+    display: block;
+    width: 100%;
+    margin-bottom: 0.75rem;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  button {
+    padding: 0.5rem 1rem;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Quincena grid */
+  .grid-quincenas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+  
+  .tarjeta-quincena {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .titulo-quincena {
+    font-weight: bold;
+    font-size: 1.1rem;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  /* Gasto item */
+  .item-gasto {
+    background-color: #f9f9f9;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+  }
+  
+  .item-gasto strong {
+    color: #333;
+  }
+  
+  .item-gasto em {
+    color: #666;
+  }
+  
+  .item-gasto small {
+    color: #888;
+    display: block;
+    margin-top: 0.3rem;
+  }
+  
+  .item-gasto button {
+    margin-right: 0.5rem;
+    margin-top: 0.5rem;
+  }
+  
+  /* Responsive tweaks */
+  @media (max-width: 768px) {
+    .grid-quincenas {
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+  
+    button {
+      width: 100%;
+    }
+  }
+  
