@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-
+  // Generación de quincenas por fecha
   document.getElementById("generarQuincenas").addEventListener("click", () => {
     const fechaInicio = document.getElementById("fechaInicio").value;
     const fechaFin = document.getElementById("fechaFin").value;
@@ -34,6 +34,7 @@ const continuar = tarjetasConDatos.length === 0 || confirm(
 
 if (continuar) {
   document.getElementById("contenedor-quincenas").innerHTML = "";
+  localStorage.removeItem("quincenasGuardadas");
   generarQuincenas(fechaInicio, fechaFin);
   document.getElementById("formulario-gasto").style.display = "block";
 }
@@ -49,6 +50,8 @@ if (continuar) {
 const form = document.getElementById("form-gasto");
 const contenedor = document.getElementById("contenedor-quincenas");
 
+cargarQuincenasDesdeLocalStorage()
+
 // Crear las 24 tarjetas por quincena
 const meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
@@ -59,9 +62,9 @@ function generarQuincenas(fechaInicioStr, fechaFinStr) {
   let fechaInicio = new Date(anio, mes - 1, dia);
   const fechaFin = new Date(fechaFinStr);
 
-  // Asegurar que la fecha de inicio sea el día 1 o 16 (inicio de una quincena)
-  if (fechaInicio.getDate() > 15) {
-    fechaInicio.setDate(16);
+  // Asegurar que la fecha de inicio sea el día 1 o 15 (inicio de una quincena)
+  if (fechaInicio.getDate() > 14) {
+    fechaInicio.setDate(15);
   } else {
     fechaInicio.setDate(1);
   }
@@ -70,7 +73,7 @@ function generarQuincenas(fechaInicioStr, fechaFinStr) {
   while (fechaInicio <= fechaFin) {
     const mes = fechaInicio.getMonth(); // 0-11
     const anio = fechaInicio.getFullYear();
-    const quincena = fechaInicio.getDate() <= 15 ? "1ª Quincena" : "2ª Quincena";
+    const quincena = fechaInicio.getDate() <= 14 ? "1ª Quincena" : "2ª Quincena";
 
     const tarjeta = document.createElement("div");
     tarjeta.classList.add("tarjeta-quincena");
@@ -89,6 +92,7 @@ function generarQuincenas(fechaInicioStr, fechaFinStr) {
       fechaInicio.setDate(1);
     }
   }
+  guardarQuincenasEnLocalStorage()
 }
 
 
@@ -98,10 +102,100 @@ function obtenerIdQuincena(fechaStr) {
   const anio = fecha.getFullYear();
   const mes = fecha.getMonth(); // 0-11
   const dia = fecha.getDate();
-  const quincena = dia <= 15 ? 1 : 2;
+  const quincena = dia <= 14 ? 1 : 2;
   return `q-${anio}-${mes}-${quincena}`;
 }
 
+// Guardar quincenas en localStorage
+function guardarQuincenasEnLocalStorage() {
+  const quincenas = [];
+
+  document.querySelectorAll(".tarjeta-quincena").forEach(tarjeta => {
+    const titulo = tarjeta.querySelector(".titulo-quincena").textContent;
+    const id = tarjeta.querySelector(".contenedor-gastos").id;
+    const gastos = [];
+
+    tarjeta.querySelectorAll(".item-gasto").forEach(item => {
+      const alias = item.querySelector("strong").textContent;
+      const monto = item.innerHTML.match(/\$([0-9]+)/)?.[1] || "";
+      const pago = item.innerHTML.match(/Pago: ([0-9\-]+)/)?.[1] || "";
+      const categoria = item.querySelector("em")?.textContent || "";
+      const notas = item.querySelector("small")?.textContent.replace("Notas: ", "") || "";
+
+      gastos.push({ alias, monto, pago, categoria, notas });
+    });
+
+    quincenas.push({ id, titulo, gastos });
+  });
+
+  localStorage.setItem("quincenasGuardadas", JSON.stringify(quincenas));
+
+  const fechaInicio = document.getElementById("fechaInicio").value;
+const fechaFin = document.getElementById("fechaFin").value;
+
+localStorage.setItem("fechasQuincena", JSON.stringify({ fechaInicio, fechaFin }));
+}
+
+// Cargar quincenas desde localStorage
+function cargarQuincenasDesdeLocalStorage() {
+  const data = JSON.parse(localStorage.getItem("quincenasGuardadas"));
+  const fechas = JSON.parse(localStorage.getItem("fechasQuincena"));
+if (fechas) {
+  document.getElementById("fechaInicio").value = fechas.fechaInicio;
+  document.getElementById("fechaFin").value = fechas.fechaFin;
+  document.getElementById("formulario-gasto").style.display = "block";
+}
+
+  if (!data) return;
+
+  const contenedor = document.getElementById("contenedor-quincenas");
+  contenedor.innerHTML = "";
+
+  data.forEach(({ id, titulo, gastos }) => {
+    const tarjeta = document.createElement("div");
+    tarjeta.classList.add("tarjeta-quincena");
+
+    tarjeta.innerHTML = `
+      <div class="titulo-quincena">${titulo}</div>
+      <div id="${id}" class="contenedor-gastos"></div>
+    `;
+
+    contenedor.appendChild(tarjeta);
+
+    const contenedorGastos = tarjeta.querySelector(".contenedor-gastos");
+
+    gastos.forEach(({ alias, monto, pago, categoria, notas }) => {
+      const item = document.createElement("div");
+      item.classList.add("item-gasto");
+
+      item.innerHTML = `
+        <strong>${alias}</strong> - $${monto} <br />
+        <em>${categoria}</em> | Pago: ${pago} <br />
+        ${notas ? `<small>Notas: ${notas}</small>` : ""}
+        <br />
+        <button class="btn-visualizar">Visualizar</button>
+        <button class="btn-eliminar">Eliminar</button>
+      `;
+
+      // Agregar funcionalidad de botones
+      item.querySelector(".btn-visualizar").addEventListener("click", () => {
+        mostrarFormularioEdicion({
+          alias, monto, fechaRegistro: pago, fechaPago: pago,
+          categoria, mesesDiferidos: 1, notas, itemDOM: item,
+        });
+      });
+
+      item.querySelector(".btn-eliminar").addEventListener("click", () => {
+        if (confirm("¿Eliminar este gasto?")) {
+          item.remove();
+          guardarQuincenasEnLocalStorage();
+        }
+      });
+
+      contenedorGastos.appendChild(item);
+    });
+  });
+}
 
 // Evento del formulario
 form.addEventListener("submit", function (e) {
@@ -157,11 +251,12 @@ form.addEventListener("submit", function (e) {
     item.querySelector(".btn-eliminar").addEventListener("click", () => {
       if (confirm("¿Estás seguro de eliminar este gasto?")) {
         item.remove();
+        guardarQuincenasEnLocalStorage()
       }
     });
   }
-  
   form.reset();
+  guardarQuincenasEnLocalStorage()
 });
 
 function mostrarFormularioEdicion(gasto) {
@@ -185,24 +280,6 @@ function mostrarFormularioEdicion(gasto) {
     <button type="submit">Guardar cambios</button>
     <button type="button" class="cancelar">Cancelar</button>
   `;
-
-  function guardarDatosEnLocalStorage() {
-  const datos = {
-    quincenas: [...document.querySelectorAll('.quincena')].map(quincena => {
-      const titulo = quincena.querySelector('.quincena-titulo').textContent;
-      const gastos = [...quincena.querySelectorAll('.gasto')].map(gasto => ({
-        alias: gasto.querySelector('span:nth-child(1)').textContent,
-        monto: gasto.querySelector('span:nth-child(2)').textContent,
-        fechaPago: gasto.querySelector('span:nth-child(3)').textContent,
-        categoria: gasto.querySelector('span:nth-child(4)').textContent,
-        notas: gasto.querySelector('span:nth-child(5)').textContent
-      }));
-      return { titulo, gastos };
-    })
-  };
-  localStorage.setItem('datosGastos', JSON.stringify(datos));
-}
-
 
   // Reemplazar el item visual por el formulario
   itemDOM.replaceWith(formEdit);
@@ -248,14 +325,18 @@ function mostrarFormularioEdicion(gasto) {
     nuevoItem.querySelector(".btn-eliminar").addEventListener("click", () => {
       if (confirm("¿Estás seguro de eliminar este gasto?")) {
         nuevoItem.remove();
+        guardarQuincenasEnLocalStorage()
       }
     });
   
     // Reemplazar el formulario por el nuevo item actualizado
     formEdit.replaceWith(nuevoItem);
+
+    guardarQuincenasEnLocalStorage()
   });
   
 }
+
 });
 
 function generarTarjetasPorFecha(fechaInicio, fechaFin) {
